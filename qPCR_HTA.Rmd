@@ -4,6 +4,8 @@ author: "Lisa Komoroske"
 date: "August 9, 2016"
 output: html_document
 ---
+##*Note this .Rmd is a work in progress...transitioning from scripts...*
+
 ## Introduction
 This document is focused on rapid processing and statistical analysis of qPCR gene expression data from XX instrument. The input is .txt files that have been processed by SDS software (for instructions on this are [here] [1]). Note this script is currently just in a 'quick and dirty' format that I wrote awhile back-much of the code could be made more compact and elegant/formatted for general use-hope to get to this soon. But, it works, and can be viewed as an example and amended easily to match other datasets in the meantime.
 
