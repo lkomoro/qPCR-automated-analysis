@@ -1,0 +1,406 @@
+---
+title: "qPCR_highthroughput_workflow"
+author: "Lisa Komoroske"
+date: "August 9, 2016"
+output: html_document
+---
+## Introduction
+This document is focused on rapid processing and statistical analysis of qPCR gene expression data from XX instrument. The input is .txt files that have been processed by SDS software (for instructions on this are [here] [1]). Note this script is currently just in a 'quick and dirty' format that I wrote awhile back-much of the code could be made more compact and elegant/formatted for general use-hope to get to this soon. But, it works, and can be viewed as an example and amended easily to match other datasets in the meantime.
+
+##Part I: Data read in and clean up
+###Set working directory
+```{r setwd, echo=TRUE}
+source('/users/Komo/Desktop/Rfiles/toolbox.functions.R')
+setwd('/users/Komo/Desktop/Rfiles/qPCR.analysis')
+getwd()
+```
+###Read in qPCR data exported from SDS software and clean up *(this code, and several others below could be generalized to run in a loop)*
+```{r dataload, echo=TRUE}
+plate1<-read.delim('Connon.p1.7.1.14.edited.txt')
+plate2<-read.delim('Connon.p2.7.1.14.edited.txt')
+plate3<-read.delim('Connon.p3.7.1.14.edited.txt')
+plate4<-read.delim('Connon.p4.7.1.14.edited.txt')
+plate5<-read.delim('Connon.p5.7.1.14.edited.txt')
+plate6<-read.delim('Connon.p6.7.1.14.edited.txt')
+plate7<-read.delim('Connon.p7.7.2.14.edited.txt')
+plate8<-read.delim('Connon.p8.7.2.14.edited.txt')
+plate9<-read.delim('Connon.p9.7.2.14.edited.txt')
+plate10<-read.delim('Connon.p10.7.2.14.edited.txt')
+plate11<-read.delim('Connon.p11.7.2.14.edited.txt')
+plate12<-read.delim('Connon.p12.7.2.14.edited.txt')
+plate13<-read.delim('Connon.p13.7.7.14.edited.txt')
+plate14<-read.delim('Connon.p14.7.7.14.edited.txt')
+plate15<-read.delim('Connon.p15.7.7.14.edited.txt')
+plate16<-read.delim('Connon.p16.7.7.14.edited.txt')
+plate17<-read.delim('Connon.p17.7.7.14.edited.txt')
+plate18<-read.delim('Connon.p18.7.7.14.edited.txt')
+plate19<-read.delim('Connon.p19.7.8.14.edited.txt')
+plate20<-read.delim('Connon.p20.7.8.14.edited.txt')
+plate21<-read.delim('Connon.p21.7.8.14.edited.txt')
+plate22<-read.delim('Connon.p22.7.8.14.edited.txt')
+plate23<-read.delim('Connon.p23.7.8.14.edited.txt')
+plate24<-read.delim('Connon.p24.7.8.14.edited.txt')
+plate25<-read.delim('Connon.p25.7.9.14.edited.txt')
+plate26<-read.delim('Connon.p26.7.9.14.edited.txt')
+plate27<-read.delim('Connon.p27.7.9.14.edited.txt')
+plate28<-read.delim('Connon.p28.7.9.14.edited.txt')
+```
+###Check the data structure 
+*notes:*
+*CT will be factor because of Undetermined at first, unless there are no undetermined values on your plate. If you have any plates that don't have undetermined values, it will read the Ct as a number, and then replace with NAs in the merge (because if some plates have Ct as factor and others as a num, it will get confused during the merge)*
+```{r data structure, echo=TRUE}
+str(plate1)
+str(plate2)
+#etc. if you want to check more plates
+str(plate28)#checking because I think this one doesn't have undet. bc we took the blank off
+plate28$Ct<-factor(plate28$Ct)#change to factor
+```
+
+###Formatting: Rename to 'qPCR wells' match column names for merging files and clean up
+```{r formatting, echo=TRUE}
+plate1$qPCR.well<-plate1$Sample.Name
+plate2$qPCR.well<-plate2$Sample.Name
+plate3$qPCR.well<-plate3$Sample.Name
+plate4$qPCR.well<-plate4$Sample.Name
+plate5$qPCR.well<-plate5$Sample.Name
+plate6$qPCR.well<-plate6$Sample.Name
+plate7$qPCR.well<-plate7$Sample.Name
+plate8$qPCR.well<-plate8$Sample.Name
+plate9$qPCR.well<-plate9$Sample.Name
+plate10$qPCR.well<-plate10$Sample.Name
+plate11$qPCR.well<-plate11$Sample.Name
+plate12$qPCR.well<-plate12$Sample.Name
+plate13$qPCR.well<-plate13$Sample.Name
+plate14$qPCR.well<-plate14$Sample.Name
+plate15$qPCR.well<-plate15$Sample.Name
+plate16$qPCR.well<-plate16$Sample.Name
+plate17$qPCR.well<-plate17$Sample.Name
+plate18$qPCR.well<-plate18$Sample.Name
+plate19$qPCR.well<-plate19$Sample.Name
+plate20$qPCR.well<-plate20$Sample.Name
+plate21$qPCR.well<-plate21$Sample.Name
+plate22$qPCR.well<-plate22$Sample.Name
+plate23$qPCR.well<-plate23$Sample.Name
+plate24$qPCR.well<-plate24$Sample.Name
+plate25$qPCR.well<-plate25$Sample.Name
+plate26$qPCR.well<-plate26$Sample.Name
+plate27$qPCR.well<-plate27$Sample.Name
+plate28$qPCR.well<-plate28$Sample.Name
+
+#remove extraneous columns:
+plate1.short<-plate1[,c(1,6,21,35)]
+plate2.short<-plate2[,c(1,6,21,35)]
+plate3.short<-plate3[,c(1,6,21,35)]
+plate4.short<-plate4[,c(1,6,21,35)]
+plate5.short<-plate5[,c(1,6,21,35)]
+plate6.short<-plate6[,c(1,6,21,35)]
+plate7.short<-plate7[,c(1,6,21,35)]
+plate8.short<-plate8[,c(1,6,21,35)]
+plate9.short<-plate9[,c(1,6,21,35)]
+plate10.short<-plate10[,c(1,6,21,35)]
+plate11.short<-plate11[,c(1,6,21,35)]
+plate12.short<-plate12[,c(1,6,21,35)]
+plate13.short<-plate13[,c(1,6,21,35)]
+plate14.short<-plate14[,c(1,6,21,35)]
+plate15.short<-plate15[,c(1,6,21,35)]
+plate16.short<-plate16[,c(1,6,21,35)]
+plate17.short<-plate17[,c(1,6,21,35)]
+plate18.short<-plate18[,c(1,6,21,35)]
+plate19.short<-plate19[,c(1,6,21,35)]
+plate20.short<-plate20[,c(1,6,21,35)]
+plate21.short<-plate21[,c(1,6,21,35)]
+plate22.short<-plate22[,c(1,6,21,35)]
+plate23.short<-plate23[,c(1,6,21,35)]
+plate24.short<-plate24[,c(1,6,21,35)]
+plate25.short<-plate25[,c(1,6,21,35)]
+plate26.short<-plate26[,c(1,6,21,35)]
+plate27.short<-plate27[,c(1,6,21,35)]
+plate28.short<-plate28[,c(1,6,21,35)]
+
+#create column for plates identifiers:
+plate1.short$qPCR.plate<-1
+plate2.short$qPCR.plate<-2
+plate3.short$qPCR.plate<-3
+plate4.short$qPCR.plate<-4
+plate5.short$qPCR.plate<-5
+plate6.short$qPCR.plate<-6
+plate7.short$qPCR.plate<-7
+plate8.short$qPCR.plate<-8
+plate9.short$qPCR.plate<-9
+plate10.short$qPCR.plate<-10
+plate11.short$qPCR.plate<-11
+plate12.short$qPCR.plate<-12
+plate13.short$qPCR.plate<-13
+plate14.short$qPCR.plate<-14
+plate15.short$qPCR.plate<-15
+plate16.short$qPCR.plate<-16
+plate17.short$qPCR.plate<-17
+plate18.short$qPCR.plate<-18
+plate19.short$qPCR.plate<-19
+plate20.short$qPCR.plate<-20
+plate21.short$qPCR.plate<-21
+plate22.short$qPCR.plate<-22
+plate23.short$qPCR.plate<-23
+plate24.short$qPCR.plate<-24
+plate25.short$qPCR.plate<-25
+plate26.short$qPCR.plate<-26
+plate27.short$qPCR.plate<-27
+plate28.short$qPCR.plate<-28
+```
+###Merge plates into one dataframe and continue clean up formatting
+```{r formatting, echo=TRUE}
+full.data<-rbind(plate1.short,plate2.short,plate3.short,plate4.short,plate5.short,plate6.short,plate7.short,plate8.short,plate9.short,plate10.short,plate11.short,plate12.short,plate13.short,plate14.short,plate15.short,plate16.short,plate17.short,plate18.short,plate19.short,plate20.short,plate21.short,plate22.short,plate23.short,plate24.short,plate25.short,plate26.short,plate27.short,plate28.short)
+
+#export .csv if want to check and/or save for later-
+write.table(full.data, file = "combined.CT.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+
+#get rid of rows with undetermined Ct values:(code is a little clunky but does the job)
+#can chose to do or not if want to leave Undet. in; from here down I included codes for both options
+full.data.clean<-subset(full.data, Ct!="Undetermined")
+full.data.clean$Ct.character<-as.character(full.data.clean$Ct)
+full.data.clean$Ct.num<-as.numeric(full.data.clean$Ct.character)
+
+#or if not taking out undet:(will generate NAs in num column-will see warning message about this)
+full.data$Ct.character<-as.character(full.data$Ct)
+full.data$Ct.num<-as.numeric(full.data$Ct.character)
+#note, alternatively if you want to retain cells that are undetermined to keep track but not generate NAs, 
+#can replace with "" so they are just blank. (I remove the NAs below from analysis-doesn't really make a difference
+#if you do it here or later, I just wanted to keep track here so I left them in)
+
+#change name to match part II df in merge below
+full.data.clean$qPCR.plate.24<-full.data.clean$qPCR.plate
+full.data$qPCR.plate.24<-full.data$qPCR.plate
+#double check:
+str(full.data.clean)
+str(full.data)
+#remove extra crap: (I save as new dfs in case need to go back, but can write over dfs if you want)
+full.data.clean1<-full.data.clean[,c(4,7,8)]
+#For this one I saved both the columns with the undet. and the new columns just to confirm that it's only the undet.that are turning into NA's (it is).
+#but you can choose to take it out and just save the numeric column
+full.data1<-full.data[,c(2,4,7,8)]
+
+#note, can also do cleaning, shortening etc. above for each plate (might want to do if only have a few plates), then combine:
+#add data from both plates into one file:
+qPCR.results.comb <- rbind(plate1.clean, plate2.clean) #etc.
+```
+
+##Part II: read in supporting files and merge:
+Read in template files with corresponding cDNA wells and gene #s for a 12 or 24 gene set of 384 qPCR plates for a 96 well plate (either 3 or 6 plates):
+```{r readin2, echo=TRUE}
+qPCR.24.template<-read.csv('qPCR.384template.24.gene.csv')
+
+#in EXCEL-use the cDNA template to paste in sample IDs for your 96 well plate, then read this in:
+#default just has sample name, but can easy paste in treatments/do text columns, etc. if want to parse before reading in
+cDNA.96<-read.csv('cDNA.thermal.microarray.samples.csv')
+#get rid of the blanks if you had empty wells in 96 well plate:
+cDNA.96.short <- cDNA.96[!(cDNA.96$temp.treatment==""),]
+
+#can also run this if your excel generated NA's instead of blanks-
+#mine just generates blanks so only the above code is necessary
+cDNA.96.short<-subset(cDNA.96, sample.id!=NA)
+
+#in EXCEL-copy and paste your gene names into the gene.ID.template and read in here:
+gene.ID<-read.csv('gene.ID.thermal.microarray.csv')
+qPCR.gene.ID.24.merge<-merge(gene.ID,qPCR.24.template)
+write.table(qPCR.gene.ID.24.merge, file = "qPCR.gene.ID.24.merge.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+qPCR.sample.ID.merge<-merge(qPCR.gene.ID.24.merge,cDNA.96.short)#if want to retain everything, can add all=T in parantheses, but
+#in this case we want to get rid of any empty wells, so leave out and will only keep where you had matching samples
+
+#if you want at this point you can remove extraneous rows/columns (depending on if you had 12 or 24 genes, etc.)
+str(qPCR.sample.ID.merge)
+#note that the code below will depend on your dataset, may need to amend depending on plate setup, etc. (that's why check structure)
+# if want to shorten up anything
+#example:
+qPCR.sample.ID.merge1<-qPCR.sample.ID.merge[,c(1:6)]
+#at this point, you can export to excel if you want to double check that everything merged correctly.
+#(once you have proved to yourself that it's all gravy, can skip)
+#(note that this is for the full merged file, not the shortened example because I wanted to keep everything for now)
+write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+```
+##Part III: merge supporting info(file IDs/gene names) etc. with qPCR results:####
+#two files we want are:
+#1 full.data.clean1 (or full.data1 if didn't want to remove undetermines)
+#2 qPCR.sample.ID.merge
+#we want to merge them based on qPCR.well and qPCR plate. The final merged file should have
+#the same # of observations as the qPCR.results.comb. The qPCR results should have less if you 
+#removed all the Undet.
+#1. undet. removed:
+data<-merge(qPCR.sample.ID.merge,full.data.clean1)
+#2 undet. retained as NAs:
+data1<-merge(qPCR.sample.ID.merge,full.data1)
+#check:
+str(data)
+str(data1)
+#can export at this stage if desired:
+#1. undet. removed:
+write.table(data, file = "merged.thermal.data.total.undet.removed.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+#2 undet. retained as NAs:
+write.table(data1, file = "merged.thermal.data.total.undetermined.retained.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+
+#here's where I removed the few data points that the curves looked bad/funky for QC:
+#for my records, here are the samples that were removed:
+#sample #338-T3-t30-R5 15C acclimation, gene=CDKN1B, case #5050 (qPCR plate 22, qPCR well L18,  cDNA plate #4, cDNA well F8)
+#sample #398-HC-t60-R6 15C acclimation, gene=BT1A1, case #6305 (qPCR plate 26, qPCR well D24, cDNA plate # 5, cDNA well B4)
+#sample #46-T3-t60-R5 11.5C acclimation, gene=CDKN1B, case #7594 (qPCR plate 3, qPCR well L18, cDNA plate #1, cDNA well F6)
+#sample #142-T1-t60-R4 18C acclimation, gene=CDKN1B, case #9754 (qPCR plate 9, qPCR well L18, cDNA plate # 3, cDNA well F6)
+data1.odd.remove<-data1[c(1:5049,5051:6304,6306:7593,7595:9753,9755:9840), ] 
+#just double checking to make sure removed right ones, yes correct.
+write.table(data1.odd.remove, file = "merged.thermal.data.total.undetermined.retained.bad.sample.removed.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+
+#Part IV: normalizing by HK genes or GeNorm normalization factor and prepping for analyses:####
+
+#if using genorm to assess HK gene stability, subset HK and import the .csv into program in lab, 
+#run algorithm for stability (can also calculate normalization factors but code also below for that)
+#if want to calculate normalization factor in GeNorm, then can use the same merge function below to attach the normalization factor to divide by
+#1. undet. removed:
+HK.genes.df<-subset(data, gene.name=="G6PD" |gene.name=="GAPDH"|gene.name=="RPS9")
+write.table(HK.genes.df, file = "HK.genes.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+
+#2 undet. retained as NAs but with weird samples removed:
+HK.genes.w.undet.df<-subset(data1.odd.remove, gene.name=="G6PD" |gene.name=="GAPDH"|gene.name=="RPS9")
+write.table(HK.genes.w.undet.df, file = "HK.genes.w.undet.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+#alternatively, looks like there's something to do normalize in Bioconductor, script looks pretty simple, but haven't 
+#had time yet to look into this: 
+# http://www.bioconductor.org/packages/release/bioc/html/qpcrNorm.html
+source("http://bioconductor.org/biocLite.R")
+biocLite("qpcrNorm")
+
+#Method One: if you just want to normalize to a reference gene
+#Example, Let's say that G6PD is our HK gene for now, but if have normalization factors already calculated from geNorm, 
+#can import that file and merge with the same way on sample #
+#(be sure to keep the sample #s in the file so it can merge on those values)
+hk<-subset(data1.odd.remove,gene.name=="G6PD")
+hk$ref.Ct<-hk$Ct.num
+str(hk)
+hk1<-hk[,c(12,15)]
+str(hk1)
+normalized.data<-merge(data1.odd.remove,hk1)
+normalized.data$norm.CT<-(normalized.data$Ct.num-normalized.data$ref.Ct)
+#can export at this stage if desired:
+write.table(normalized.data, file = "normalized.thermal.data.total.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+str(normalized.data)
+#shorten up if desired:
+normalized.data1.short<-normalized.data[,c(1,2,6:12,16)]
+
+#switch to wide format for downstream calculations/analyses:
+w <- reshape(normalized.data1.short, 
+             timevar = "gene.name",
+             idvar = c("qPCR.plate.24", "acclimation.temperature", "life.stage", "temp.treatment", "recovery.time", "replicate","tissue", "sample.no"),
+             direction = "wide")
+
+#Method 2-say you already have the stability calculated so you know what genes to use and want to calculate the 
+#normalization factor directly here
+#Note-below is for calculating normalization factors using all the total dataset. If you want to do it per plate, can amend
+#by splitting by plate in calculations, etc.
+#First, need to remove NA's if you haven't already, or else will use those as minimum per gene
+data2<-data1.odd.remove[complete.cases(data1.odd.remove[,c(14)]),] #- will only select rows with complete data in columns 14; may need to adjust which column(s) to perform function on based on dataset
+#double checked in excel written .csv file from above against the data1 and data2 df's, confirmed that this deletes the NAs which correspond to the Undetermined values, and ONLY those cases
+library(plyr)
+min.per.gene<-ddply(data2, "gene.name", function(x) {
+  min.Ct.per.gene <- min(x$Ct.num)
+})
+data2<-merge(min.per.gene,data2)
+#only write to file (below) if you want to prove to yourself that it in fact took the correct minimum per gene 
+# I did it and confirmed cross checking with Excel Calcs-all good
+#note that it saves the minumum per gene in the column called "V1"
+write.table(data2, file = "QC.check.correct.min.per.gene.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+
+data2$min.corr.Ct<-data2$Ct.num-data2$V1
+data2$linearCt<-2^(-data2$min.corr.Ct)
+#NB I wrote the two above transformations to file as well and QCed them
+
+#Subset your ref genes to generate normalization factor:
+ref.genes<-subset(data2, gene.name=="G6PD" |gene.name=="GAPDH"|gene.name=="RPS9")
+ref.genes.short<-ref.genes[,c(1,3,7:13,17)]
+#if want to export:
+write.table(ref.genes.short, file = "thermal.ref.genes.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+#switch to wide format to make calculations easier: (probably a way to do this in long format but I knew how to do it this way)
+wide.ref <- reshape(ref.genes.short, 
+             timevar = "gene.name",
+             idvar = c("qPCR.plate.24", "acclimation.temperature", "life.stage", "temp.treatment", "recovery.time", "replicate","tissue", "sample.no"),
+             direction = "wide")
+#if want to export:
+write.table(wide.ref, file = "thermal.ref.genes.wide.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+str(wide.ref)
+#Normalization factors:
+
+#geometric mean function:
+geo_mean <- function(data) {
+  log_data <- log(data)
+  gm <- exp(mean(log_data[is.finite(log_data)]))
+  return(gm)
+}
+#do first with test data and cross check with Ken's spreadsheet to make sure works:
+test.data<-read.csv("test.data.csv")
+#1-calculate geomean across ref genes for each sample:
+test.data$geomean<-(test.data$x1*test.data$x2*test.data$x3)^(1/3)#note need to change this depending on how many ref genes you have (i.e., if have 2, change exponent to 1/2)
+#QC-copy and pasted these values into Ken's spreadsheet-confirmed exact same values 
+#FYI Ken's code in excel=(PRODUCT(range of ref gene values per each sample))^(1/COUNT(range of ref gene values per each sample))
+#probably can go back and figure out how to apply the function across columns so don't need to change gene #, but fine for now
+
+#2-calculate the geometric mean of all the samples for each reference gene:
+t1<-geo_mean(test.data$x1)
+t2<-geo_mean(test.data$x2)
+t3<-geo_mean(test.data$x3)
+#QC-compared, correct #FYI Ken's code in excel =(PRODUCT(range of values for one gene for all samples))^(1/COUNT(range of values for one gene for all samples)))
+#3-geomean of geomeans:#FYI Ken's code in excel=(PRODUCT(the range of cells with the geomeans for all your ref genes))^(1/COUNT(the range of cells with the geomeans for all your ref genes)))
+V2<-geo_mean(c(t1,t2,t3))
+#QC-compared, correct
+#4-calculate normalization factor for each sample (#FYI Ken's code in excel==geomean of all the ref genes for the sample/geomean of geomeans)
+test.data$norm.factor<-(test.data$geomean)/V2
+#QC-compared, correct
+
+#now for real data:
+#1-calculate geomean across ref genes for each sample:
+wide.ref$geomean<-(wide.ref$linearCt.G6PD*wide.ref$linearCt.GAPDH*wide.ref$linearCt.RPS9)^(1/3)
+#2-calculate the geometric mean of all the samples for each reference gene:
+x1<-geo_mean(wide.ref$linearCt.G6PD)
+x2<-geo_mean(wide.ref$linearCt.GAPDH)
+x3<-geo_mean(wide.ref$linearCt.RPS9)
+
+#3-geomean of geomeans:#FYI Ken's code in excel=(PRODUCT(the range of cells with the geomeans for all your ref genes))^(1/COUNT(the range of cells with the geomeans for all your ref genes)))
+G1<-geo_mean(c(x1,x2,x3))
+#4-calculate normalization factor for each sample (#FYI Ken's code in excel==geomean of all the ref genes for the sample/geomean of geomeans)
+wide.ref$norm.factor<-(wide.ref$geomean)/G1
+
+#merge back with full data:
+data3<-merge(wide.ref,data2, all=T)#checking to make sure all cases get assigned, and if not, figure out why cases disappear when have all=false (default)
+data3b<-merge(wide.ref,data2)
+write.table(data3, file = "data.norm.check1.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+write.table(data3b, file = "data.norm.check2.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+#for my data, it was that 2 genes for a blank actually had Ct values (high 30's) so they were retained, but since the 
+#ref genes had been removed as NA's, there was nothing to match them too (see the qPCR spreadsheet for further notes)
+#so actually, want to delete these cases so good to use 'data3b' for downstream
+data3b$Ct.normalized<-data3b$linearCt/data3b$norm.factor
+data3b$Ct.log2.form<-(-log(data3b$Ct.normalized,base=2))
+#shorten up:
+data4<-data3b[,c(1:7,8,14,24)]
+write.table(data4, file = "Ct.all.normalized.long.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+#switch to wide for gene by gene analyses:
+data4.wide <- reshape(data4, 
+                    timevar = "gene.name",
+                    idvar = c("qPCR.plate.24", "acclimation.temperature", "life.stage", "temp.treatment", "recovery.time", "replicate","tissue", "sample.no"),
+                    direction = "wide") 
+write.table(data4.wide, file = "Ct.all.normalized.wide.csv", sep = ",", col.names = NA,
+            qmethod = "double")
+
+#last processing would be to calculate mean for control for each gene, and then use this to calcualte 
+#delta delta Cts, and logfold changes. But for mine, a bit ambiguous about which one is control (bc temp and time), so holding off and just using delta CT for now
+
+
+[1] https://github.com/lkomoro/qPCR-automated-analysis/blob/master/Instructions%20for%20qPCR%20data%20extraction%20using%20SDS%20software.pdf
