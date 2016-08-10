@@ -16,7 +16,8 @@ source('/users/Komo/Desktop/Rfiles/toolbox.functions.R')
 setwd('/users/Komo/Desktop/Rfiles/qPCR.analysis')
 getwd()
 ```
-###Read in qPCR data exported from SDS software and clean up *(this code, and several others below could be generalized to run in a loop)*
+###Read in qPCR data exported from SDS software and clean up 
+*(this code, and several others below should be generalized to read in and name in a loop)*
 ```{r dataload, echo=TRUE}
 plate1<-read.delim('Connon.p1.7.1.14.edited.txt')
 plate2<-read.delim('Connon.p2.7.1.14.edited.txt')
@@ -89,7 +90,7 @@ plate26$qPCR.well<-plate26$Sample.Name
 plate27$qPCR.well<-plate27$Sample.Name
 plate28$qPCR.well<-plate28$Sample.Name
 
-#remove extraneous columns:
+#remove extraneous columns: (assumes you have the same column structure that is output from the SDS software)
 plate1.short<-plate1[,c(1,6,21,35)]
 plate2.short<-plate2[,c(1,6,21,35)]
 plate3.short<-plate3[,c(1,6,21,35)]
@@ -191,36 +192,49 @@ qPCR.results.comb <- rbind(plate1.clean, plate2.clean) #etc.
 Read in template files with corresponding cDNA wells and gene #s for a 12 or 24 gene set of 384 qPCR plates for a 96 well plate (either 3 or 6 plates):
 ```{r readin2, echo=TRUE}
 qPCR.24.template<-read.csv('qPCR.384template.24.gene.csv')
-
-#in EXCEL-use the cDNA template to paste in sample IDs for your 96 well plate, then read this in:
-#default just has sample name, but can easy paste in treatments/do text columns, etc. if want to parse before reading in
+```
+In MS Excel, use the cDNA template to paste in sample IDs for your 96 well plate, then read in
+My default just has sample name, but you can easy paste in treatments/do text columns, etc. if want to parse before reading in
+```{r readin2, echo=TRUE}
 cDNA.96<-read.csv('cDNA.thermal.microarray.samples.csv')
-#get rid of the blanks if you had empty wells in 96 well plate:
+```
+Get rid of the blanks if you had empty wells in 96 well plate:
+```{r readin2, echo=TRUE}
 cDNA.96.short <- cDNA.96[!(cDNA.96$temp.treatment==""),]
-
-#can also run this if your excel generated NA's instead of blanks-
-#mine just generates blanks so only the above code is necessary
+```
+If your excel generated NA's instead of blanks (mine just generates blanks so only the above code is necessary), can get rid of them:
+```{r readin2, echo=TRUE}
 cDNA.96.short<-subset(cDNA.96, sample.id!=NA)
-
-#in EXCEL-copy and paste your gene names into the gene.ID.template and read in here:
+```
+In MS Excel, copy and paste your gene names into the gene.ID.template and read in here:
+```{r readin2, echo=TRUE}
 gene.ID<-read.csv('gene.ID.thermal.microarray.csv')
+```
+Ok, so now we want to merge the metadata:
+```{r merge2, echo=TRUE}
 qPCR.gene.ID.24.merge<-merge(gene.ID,qPCR.24.template)
-write.table(qPCR.gene.ID.24.merge, file = "qPCR.gene.ID.24.merge.csv", sep = ",", col.names = NA,
+write.table(qPCR.gene.ID.24.merge, file = "qPCR.gene.ID.24.merge.csv", sep = ",", col.names = NA,#if you want to check/save it
             qmethod = "double")
 qPCR.sample.ID.merge<-merge(qPCR.gene.ID.24.merge,cDNA.96.short)#if want to retain everything, can add all=T in parantheses, but
 #in this case we want to get rid of any empty wells, so leave out and will only keep where you had matching samples
-
-#if you want at this point you can remove extraneous rows/columns (depending on if you had 12 or 24 genes, etc.)
+```
+You can remove extraneous rows/columns (depending on if you had 12 or 24 genes, etc.)
+```{r merge2, echo=TRUE}
 str(qPCR.sample.ID.merge)
-#note that the code below will depend on your dataset, may need to amend depending on plate setup, etc. (that's why check structure)
-# if want to shorten up anything
-#example:
+```
+*Note that the code below may need to be amended depending on plate setup, etc. (that's why check data structure)*
+If you want to shorten up anything
+Example:
+```{r shorten, echo=TRUE}
 qPCR.sample.ID.merge1<-qPCR.sample.ID.merge[,c(1:6)]
-#at this point, you can export to excel if you want to double check that everything merged correctly.
-#(once you have proved to yourself that it's all gravy, can skip)
-#(note that this is for the full merged file, not the shortened example because I wanted to keep everything for now)
+```
+You can export to excel if you want to double check that everything merged correctly:
+*(once you have proved to yourself that it's all gravy, can skip this)*
+Note that this is for the full merged file, not the shortened example because I wanted to keep everything for now
+```{r write, echo=TRUE}
 write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = ",", col.names = NA,
             qmethod = "double")
+```
 ```
 ##Part III: merge supporting info(file IDs/gene names) etc. with qPCR results:####
 #two files we want are:
