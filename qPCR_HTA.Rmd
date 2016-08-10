@@ -382,7 +382,7 @@ geo_mean <- function(data) {
 }
 ```
 
-Example of normalizing with test data:
+Example of using *KeNorm* normalizing with test data:
 ```{r test, echo=TRUE}
 test.data<-read.csv("test.data.csv")
 ```
