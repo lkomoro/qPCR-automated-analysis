@@ -223,27 +223,31 @@ You can remove extraneous rows/columns (depending on if you had 12 or 24 genes, 
 str(qPCR.sample.ID.merge)
 ```
 *Note that the code below may need to be amended depending on plate setup, etc. (that's why check data structure)*
+
 If you want to shorten up anything
+
 Example: 
 ```{r shorten, echo=TRUE}
 qPCR.sample.ID.merge1<-qPCR.sample.ID.merge[,c(1:6)]
 ```
 You can export to excel if you want to double check that everything merged correctly:
 *(once you have proved to yourself that it's all gravy, can skip this)*
+
 Note that this is for the full merged file, not the shortened example because I wanted to keep everything for now
 ```{r write, echo=TRUE}
 write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = ",", col.names = NA,
             qmethod = "double")
 ```
-test
-```
-##Part III: merge supporting info(file IDs/gene names) etc. with qPCR results:####
-#two files we want are:
-#1 full.data.clean1 (or full.data1 if didn't want to remove undetermines)
-#2 qPCR.sample.ID.merge
-#we want to merge them based on qPCR.well and qPCR plate. The final merged file should have
-#the same # of observations as the qPCR.results.comb. The qPCR results should have less if you 
-#removed all the Undet.
+
+##Part III: Merge supporting info(file IDs/gene names) etc. with qPCR results:
+
+The two files we want are 
+*1 full.data.clean1 (or full.data1 if didn't remove undetermines)*
+*2 qPCR.sample.ID.merge*
+
+We want to merge them based on *qPCR.well* and *qPCR plate*
+The final merged file should have the same # of observations as the qPCR.results.comb. The qPCR results should have less if you removed all the Undet.
+```{r merge3, echo=TRUE}
 #1. undet. removed:
 data<-merge(qPCR.sample.ID.merge,full.data.clean1)
 #2 undet. retained as NAs:
@@ -251,49 +255,55 @@ data1<-merge(qPCR.sample.ID.merge,full.data1)
 #check:
 str(data)
 str(data1)
-#can export at this stage if desired:
+```
+Export at this stage if desired:
+```{r export, echo=TRUE}
 #1. undet. removed:
 write.table(data, file = "merged.thermal.data.total.undet.removed.csv", sep = ",", col.names = NA,
             qmethod = "double")
 #2 undet. retained as NAs:
 write.table(data1, file = "merged.thermal.data.total.undetermined.retained.csv", sep = ",", col.names = NA,
             qmethod = "double")
+```
 
-#here's where I removed the few data points that the curves looked bad/funky for QC:
-#for my records, here are the samples that were removed:
-#sample #338-T3-t30-R5 15C acclimation, gene=CDKN1B, case #5050 (qPCR plate 22, qPCR well L18,  cDNA plate #4, cDNA well F8)
-#sample #398-HC-t60-R6 15C acclimation, gene=BT1A1, case #6305 (qPCR plate 26, qPCR well D24, cDNA plate # 5, cDNA well B4)
-#sample #46-T3-t60-R5 11.5C acclimation, gene=CDKN1B, case #7594 (qPCR plate 3, qPCR well L18, cDNA plate #1, cDNA well F6)
-#sample #142-T1-t60-R4 18C acclimation, gene=CDKN1B, case #9754 (qPCR plate 9, qPCR well L18, cDNA plate # 3, cDNA well F6)
+I removed a the few data points that the curves looked bad/funky for QC:
+For my records, here are the samples that were removed:
+-sample #338-T3-t30-R5 15C acclimation, gene=CDKN1B, case #5050 (qPCR plate 22, qPCR well L18,  cDNA plate #4, cDNA well F8)
+-sample #398-HC-t60-R6 15C acclimation, gene=BT1A1, case #6305 (qPCR plate 26, qPCR well D24, cDNA plate # 5, cDNA well B4)
+-sample #46-T3-t60-R5 11.5C acclimation, gene=CDKN1B, case #7594 (qPCR plate 3, qPCR well L18, cDNA plate #1, cDNA well F6)
+-sample #142-T1-t60-R4 18C acclimation, gene=CDKN1B, case #9754 (qPCR plate 9, qPCR well L18, cDNA plate # 3, cDNA well F6)
+```{r remove, echo=TRUE}
 data1.odd.remove<-data1[c(1:5049,5051:6304,6306:7593,7595:9753,9755:9840), ] 
 #just double checking to make sure removed right ones, yes correct.
 write.table(data1.odd.remove, file = "merged.thermal.data.total.undetermined.retained.bad.sample.removed.csv", sep = ",", col.names = NA,
             qmethod = "double")
+```
 
-#Part IV: normalizing by HK genes or GeNorm normalization factor and prepping for analyses:####
+##Part IV: normalizing by HK genes or *GeNorm* normalization factor and prepping for analyses
 
-#if using genorm to assess HK gene stability, subset HK and import the .csv into program in lab, 
-#run algorithm for stability (can also calculate normalization factors but code also below for that)
-#if want to calculate normalization factor in GeNorm, then can use the same merge function below to attach the normalization factor to divide by
-#1. undet. removed:
+If you are using *Genorm* to assess HK gene stability subset the data housekeeping genes to import the .csv into program in lab, run algorithm for stability (if you calculate normalization factor in *GeNorm*, then can use the same merge function below to attach the normalization factor to divide by)
+####Option 1. Undet. removed:
+```{r HKexport, echo=TRUE}
 HK.genes.df<-subset(data, gene.name=="G6PD" |gene.name=="GAPDH"|gene.name=="RPS9")
 write.table(HK.genes.df, file = "HK.genes.csv", sep = ",", col.names = NA,
             qmethod = "double")
-
-#2 undet. retained as NAs but with weird samples removed:
+```
+####Option 2. Undet. retained as NAs but with weird samples removed:
+```{r HKexport, echo=TRUE}
 HK.genes.w.undet.df<-subset(data1.odd.remove, gene.name=="G6PD" |gene.name=="GAPDH"|gene.name=="RPS9")
 write.table(HK.genes.w.undet.df, file = "HK.genes.w.undet.csv", sep = ",", col.names = NA,
             qmethod = "double")
-#alternatively, looks like there's something to do normalize in Bioconductor, script looks pretty simple, but haven't 
-#had time yet to look into this: 
-# http://www.bioconductor.org/packages/release/bioc/html/qpcrNorm.html
+```
+Alternatively, it like there''s something's a function tonormalize in Bioconductor, [script looks pretty simple] [2], but I haven't had time yet to look into it.
+```{r BioC, echo=TRUE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("qpcrNorm")
+```
 
-#Method One: if you just want to normalize to a reference gene
-#Example, Let's say that G6PD is our HK gene for now, but if have normalization factors already calculated from geNorm, 
-#can import that file and merge with the same way on sample #
-#(be sure to keep the sample #s in the file so it can merge on those values)
+###Method One: if you just want to normalize to a reference gene *For Example, Let's say that G6PD is our HK gene*
+
+*Or can import file from GeNorm with calculated normalization factors and merge on sample # (be sure to keep the sample #s in the file so it can merge on those values)*
+```{r Hk2, echo=TRUE}
 hk<-subset(data1.odd.remove,gene.name=="G6PD")
 hk$ref.Ct<-hk$Ct.num
 str(hk)
@@ -301,42 +311,51 @@ hk1<-hk[,c(12,15)]
 str(hk1)
 normalized.data<-merge(data1.odd.remove,hk1)
 normalized.data$norm.CT<-(normalized.data$Ct.num-normalized.data$ref.Ct)
-#can export at this stage if desired:
+#export if desired:
 write.table(normalized.data, file = "normalized.thermal.data.total.csv", sep = ",", col.names = NA,
             qmethod = "double")
 str(normalized.data)
 #shorten up if desired:
 normalized.data1.short<-normalized.data[,c(1,2,6:12,16)]
+```
 
-#switch to wide format for downstream calculations/analyses:
+Switch to wide format for downstream calculations/analyses:
+```{r wide, echo=TRUE}
 w <- reshape(normalized.data1.short, 
              timevar = "gene.name",
              idvar = c("qPCR.plate.24", "acclimation.temperature", "life.stage", "temp.treatment", "recovery.time", "replicate","tissue", "sample.no"),
              direction = "wide")
+```
+###Method 2: You already have the stability calculated, so you know what genes to use and want to calculate the normalization factor directly here
 
-#Method 2-say you already have the stability calculated so you know what genes to use and want to calculate the 
-#normalization factor directly here
-#Note-below is for calculating normalization factors using all the total dataset. If you want to do it per plate, can amend
-#by splitting by plate in calculations, etc.
-#First, need to remove NA's if you haven't already, or else will use those as minimum per gene
-data2<-data1.odd.remove[complete.cases(data1.odd.remove[,c(14)]),] #- will only select rows with complete data in columns 14; may need to adjust which column(s) to perform function on based on dataset
-#double checked in excel written .csv file from above against the data1 and data2 df's, confirmed that this deletes the NAs which correspond to the Undetermined values, and ONLY those cases
+*Note-below is for calculating normalization factors using all the total dataset. If you want to do it per plate, amend by splitting by plate in calculations, etc.*
+
+First, remove NA's if you haven't already, or else will use those as minimum per gene
+```{r M2, echo=TRUE}
+data2<-data1.odd.remove[complete.cases(data1.odd.remove[,c(14)]),] #will only select rows with complete data in columns 14; may need to adjust which column(s) to perform function on based on dataset
+```
+
+Double check against the data1 and data2 df's, confirmed that this deletes the NAs which correspond to the Undetermined values, and ONLY those cases
+```{r min, echo=TRUE}
 library(plyr)
 min.per.gene<-ddply(data2, "gene.name", function(x) {
   min.Ct.per.gene <- min(x$Ct.num)
 })
 data2<-merge(min.per.gene,data2)
 #only write to file (below) if you want to prove to yourself that it in fact took the correct minimum per gene 
-# I did it and confirmed cross checking with Excel Calcs-all good
-#note that it saves the minumum per gene in the column called "V1"
+#note that it saves the minumum per gene in the column called "V1"*
 write.table(data2, file = "QC.check.correct.min.per.gene.csv", sep = ",", col.names = NA,
             qmethod = "double")
+```
 
+Once you've checked that it correctly extracted the minimums, transform data:
+```{r transform, echo=TRUE}
 data2$min.corr.Ct<-data2$Ct.num-data2$V1
 data2$linearCt<-2^(-data2$min.corr.Ct)
 #NB I wrote the two above transformations to file as well and QCed them
-
-#Subset your ref genes to generate normalization factor:
+```
+Subset your ref genes to generate normalization factor:
+```{r sub, echo=TRUE}
 ref.genes<-subset(data2, gene.name=="G6PD" |gene.name=="GAPDH"|gene.name=="RPS9")
 ref.genes.short<-ref.genes[,c(1,3,7:13,17)]
 #if want to export:
@@ -351,19 +370,29 @@ wide.ref <- reshape(ref.genes.short,
 write.table(wide.ref, file = "thermal.ref.genes.wide.csv", sep = ",", col.names = NA,
             qmethod = "double")
 str(wide.ref)
-#Normalization factors:
+```
+####Normalization factors:
 
-#geometric mean function:
+Create geometric mean function:
+```{r fun, echo=TRUE}
 geo_mean <- function(data) {
   log_data <- log(data)
   gm <- exp(mean(log_data[is.finite(log_data)]))
   return(gm)
 }
-#do first with test data and cross check with Ken's spreadsheet to make sure works:
+```
+
+Example of normalizing with test data:
+```{r test, echo=TRUE}
 test.data<-read.csv("test.data.csv")
-#1-calculate geomean across ref genes for each sample:
-test.data$geomean<-(test.data$x1*test.data$x2*test.data$x3)^(1/3)#note need to change this depending on how many ref genes you have (i.e., if have 2, change exponent to 1/2)
-#QC-copy and pasted these values into Ken's spreadsheet-confirmed exact same values 
+```
+1.Calculate geomean across ref genes for each sample:
+```{r test, echo=TRUE}
+test.data$geomean<-(test.data$x1*test.data$x2*test.data$x3)^(1/3)
+```
+*note need to change this depending on how many ref genes you have (i.e., if have 2, change exponent to 1/2)*
+
+(QC-after writing these functions and running them on test data, I pasted these values into spreadsheet with GeNorm formulas-confirmed exact same values) 
 #FYI Ken's code in excel=(PRODUCT(range of ref gene values per each sample))^(1/COUNT(range of ref gene values per each sample))
 #probably can go back and figure out how to apply the function across columns so don't need to change gene #, but fine for now
 
@@ -418,6 +447,7 @@ write.table(data4.wide, file = "Ct.all.normalized.wide.csv", sep = ",", col.name
 
 #last processing would be to calculate mean for control for each gene, and then use this to calcualte 
 #delta delta Cts, and logfold changes. But for mine, a bit ambiguous about which one is control (bc temp and time), so holding off and just using delta CT for now
-```
+
 
 [1]:https://github.com/lkomoro/qPCR-automated-analysis/blob/master/Instructions%20for%20qPCR%20data%20extraction%20using%20SDS%20software.pdf
+[2]: http://www.bioconductor.org/packages/release/bioc/html/qpcrNorm.html
