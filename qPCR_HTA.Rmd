@@ -10,10 +10,10 @@ output: html_document
 This document is focused on rapid processing and statistical analysis of qPCR gene expression data from Applied Biosystems HT 7900 instrument [(UC Davis Vet Med Real-Time PCR Core Facility)] [3]. The input is .txt files that have been processed by SDS software (instructions on this are [here] [1]). Note this script is currently just in a 'quick and dirty' format that I wrote awhile back-much of the code could be made more compact and formatted for general use-plan to fix that up when I have a chance. But, it works, and can be viewed as an example and amended easily to match other datasets in the meantime.
 
 ###It is composed of the following sections:
-I. Data read in and clean up
-II. Read in supporting files and merge
-III. Merge supporting info (file IDs/gene names, etc.) with qPCR results
-IV. Normalizing by HK genes or *GeNorm* normalization factor and prepping for analyses
+I. Data read in and clean up  
+II. Read in supporting files and merge  
+III. Merge supporting info (file IDs/gene names, etc.) with qPCR results  
+IV. Normalizing by HK genes or *GeNorm* normalization factor and prepping for analyses  
 
 *these are the precursors to Part V+: Data Analysis & Visualization, will add and link later*
 
