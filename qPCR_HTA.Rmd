@@ -235,6 +235,7 @@ Note that this is for the full merged file, not the shortened example because I 
 write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = ",", col.names = NA,
             qmethod = "double")
 ```
+test
 ```
 ##Part III: merge supporting info(file IDs/gene names) etc. with qPCR results:####
 #two files we want are:
