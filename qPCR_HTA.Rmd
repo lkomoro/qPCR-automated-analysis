@@ -4,10 +4,13 @@ author: "Lisa Komoroske"
 date: "August 9, 2016"
 output: html_document
 ---
-##*Note this .Rmd is a work in progress...transitioning from scripts...*
+####*Note this .Rmd is a work in progress...transitioning from scripts...*
 
 ## Introduction
-This document is focused on rapid processing and statistical analysis of qPCR gene expression data from XX instrument. The input is .txt files that have been processed by SDS software (for instructions on this are [here] [1]). Note this script is currently just in a 'quick and dirty' format that I wrote awhile back-much of the code could be made more compact and elegant/formatted for general use-hope to get to this soon. But, it works, and can be viewed as an example and amended easily to match other datasets in the meantime.
+This document is focused on rapid processing and statistical analysis of qPCR gene expression data from Applied Biosystems HT 7900 instrument [(UC Davis Vet Med Real-Time PCR Core Facility)] [3]. The input is .txt files that have been processed by SDS software (instructions on this are [here] [1]). Note this script is currently just in a 'quick and dirty' format that I wrote awhile back-much of the code could be made more compact and formatted for general use-plan to fix that up when I have a chance. But, it works, and can be viewed as an example and amended easily to match other datasets in the meantime.
+
+It is composed of the following sections:
+
 
 ##Part I: Data read in and clean up
 ###Set working directory
@@ -22,31 +25,8 @@ getwd()
 plate1<-read.delim('Connon.p1.7.1.14.edited.txt')
 plate2<-read.delim('Connon.p2.7.1.14.edited.txt')
 plate3<-read.delim('Connon.p3.7.1.14.edited.txt')
-plate4<-read.delim('Connon.p4.7.1.14.edited.txt')
-plate5<-read.delim('Connon.p5.7.1.14.edited.txt')
-plate6<-read.delim('Connon.p6.7.1.14.edited.txt')
-plate7<-read.delim('Connon.p7.7.2.14.edited.txt')
-plate8<-read.delim('Connon.p8.7.2.14.edited.txt')
-plate9<-read.delim('Connon.p9.7.2.14.edited.txt')
-plate10<-read.delim('Connon.p10.7.2.14.edited.txt')
-plate11<-read.delim('Connon.p11.7.2.14.edited.txt')
-plate12<-read.delim('Connon.p12.7.2.14.edited.txt')
-plate13<-read.delim('Connon.p13.7.7.14.edited.txt')
-plate14<-read.delim('Connon.p14.7.7.14.edited.txt')
-plate15<-read.delim('Connon.p15.7.7.14.edited.txt')
-plate16<-read.delim('Connon.p16.7.7.14.edited.txt')
-plate17<-read.delim('Connon.p17.7.7.14.edited.txt')
-plate18<-read.delim('Connon.p18.7.7.14.edited.txt')
-plate19<-read.delim('Connon.p19.7.8.14.edited.txt')
-plate20<-read.delim('Connon.p20.7.8.14.edited.txt')
-plate21<-read.delim('Connon.p21.7.8.14.edited.txt')
-plate22<-read.delim('Connon.p22.7.8.14.edited.txt')
-plate23<-read.delim('Connon.p23.7.8.14.edited.txt')
-plate24<-read.delim('Connon.p24.7.8.14.edited.txt')
-plate25<-read.delim('Connon.p25.7.9.14.edited.txt')
-plate26<-read.delim('Connon.p26.7.9.14.edited.txt')
-plate27<-read.delim('Connon.p27.7.9.14.edited.txt')
-plate28<-read.delim('Connon.p28.7.9.14.edited.txt')
+#and so on until your last plate...
+plate28<-read.delim('Connon.p28.7.1.14.edited.txt')
 ```
 ###Check the data structure 
 *notes:*
@@ -64,60 +44,14 @@ plate28$Ct<-factor(plate28$Ct)#change to factor
 plate1$qPCR.well<-plate1$Sample.Name
 plate2$qPCR.well<-plate2$Sample.Name
 plate3$qPCR.well<-plate3$Sample.Name
-plate4$qPCR.well<-plate4$Sample.Name
-plate5$qPCR.well<-plate5$Sample.Name
-plate6$qPCR.well<-plate6$Sample.Name
-plate7$qPCR.well<-plate7$Sample.Name
-plate8$qPCR.well<-plate8$Sample.Name
-plate9$qPCR.well<-plate9$Sample.Name
-plate10$qPCR.well<-plate10$Sample.Name
-plate11$qPCR.well<-plate11$Sample.Name
-plate12$qPCR.well<-plate12$Sample.Name
-plate13$qPCR.well<-plate13$Sample.Name
-plate14$qPCR.well<-plate14$Sample.Name
-plate15$qPCR.well<-plate15$Sample.Name
-plate16$qPCR.well<-plate16$Sample.Name
-plate17$qPCR.well<-plate17$Sample.Name
-plate18$qPCR.well<-plate18$Sample.Name
-plate19$qPCR.well<-plate19$Sample.Name
-plate20$qPCR.well<-plate20$Sample.Name
-plate21$qPCR.well<-plate21$Sample.Name
-plate22$qPCR.well<-plate22$Sample.Name
-plate23$qPCR.well<-plate23$Sample.Name
-plate24$qPCR.well<-plate24$Sample.Name
-plate25$qPCR.well<-plate25$Sample.Name
-plate26$qPCR.well<-plate26$Sample.Name
-plate27$qPCR.well<-plate27$Sample.Name
+#and so on until your last plate...
 plate28$qPCR.well<-plate28$Sample.Name
 
 #remove extraneous columns: (assumes you have the same column structure that is output from the SDS software)
 plate1.short<-plate1[,c(1,6,21,35)]
 plate2.short<-plate2[,c(1,6,21,35)]
 plate3.short<-plate3[,c(1,6,21,35)]
-plate4.short<-plate4[,c(1,6,21,35)]
-plate5.short<-plate5[,c(1,6,21,35)]
-plate6.short<-plate6[,c(1,6,21,35)]
-plate7.short<-plate7[,c(1,6,21,35)]
-plate8.short<-plate8[,c(1,6,21,35)]
-plate9.short<-plate9[,c(1,6,21,35)]
-plate10.short<-plate10[,c(1,6,21,35)]
-plate11.short<-plate11[,c(1,6,21,35)]
-plate12.short<-plate12[,c(1,6,21,35)]
-plate13.short<-plate13[,c(1,6,21,35)]
-plate14.short<-plate14[,c(1,6,21,35)]
-plate15.short<-plate15[,c(1,6,21,35)]
-plate16.short<-plate16[,c(1,6,21,35)]
-plate17.short<-plate17[,c(1,6,21,35)]
-plate18.short<-plate18[,c(1,6,21,35)]
-plate19.short<-plate19[,c(1,6,21,35)]
-plate20.short<-plate20[,c(1,6,21,35)]
-plate21.short<-plate21[,c(1,6,21,35)]
-plate22.short<-plate22[,c(1,6,21,35)]
-plate23.short<-plate23[,c(1,6,21,35)]
-plate24.short<-plate24[,c(1,6,21,35)]
-plate25.short<-plate25[,c(1,6,21,35)]
-plate26.short<-plate26[,c(1,6,21,35)]
-plate27.short<-plate27[,c(1,6,21,35)]
+#and so on until your last plate...
 plate28.short<-plate28[,c(1,6,21,35)]
 
 #create column for plates identifiers:
@@ -125,34 +59,13 @@ plate1.short$qPCR.plate<-1
 plate2.short$qPCR.plate<-2
 plate3.short$qPCR.plate<-3
 plate4.short$qPCR.plate<-4
-plate5.short$qPCR.plate<-5
-plate6.short$qPCR.plate<-6
-plate7.short$qPCR.plate<-7
-plate8.short$qPCR.plate<-8
-plate9.short$qPCR.plate<-9
-plate10.short$qPCR.plate<-10
-plate11.short$qPCR.plate<-11
-plate12.short$qPCR.plate<-12
-plate13.short$qPCR.plate<-13
-plate14.short$qPCR.plate<-14
-plate15.short$qPCR.plate<-15
-plate16.short$qPCR.plate<-16
-plate17.short$qPCR.plate<-17
-plate18.short$qPCR.plate<-18
-plate19.short$qPCR.plate<-19
-plate20.short$qPCR.plate<-20
-plate21.short$qPCR.plate<-21
-plate22.short$qPCR.plate<-22
-plate23.short$qPCR.plate<-23
-plate24.short$qPCR.plate<-24
-plate25.short$qPCR.plate<-25
-plate26.short$qPCR.plate<-26
-plate27.short$qPCR.plate<-27
+#and so on until your last plate...
 plate28.short$qPCR.plate<-28
 ```
 ###Merge plates into one dataframe and continue clean up formatting
 ```{r formatting, echo=TRUE}
-full.data<-rbind(plate1.short,plate2.short,plate3.short,plate4.short,plate5.short,plate6.short,plate7.short,plate8.short,plate9.short,plate10.short,plate11.short,plate12.short,plate13.short,plate14.short,plate15.short,plate16.short,plate17.short,plate18.short,plate19.short,plate20.short,plate21.short,plate22.short,plate23.short,plate24.short,plate25.short,plate26.short,plate27.short,plate28.short)
+full.data<-rbind(plate1.short,plate2.short,plate3.short,#and so on until your last plate...
+                 plate28.short)
 
 #export .csv if want to check and/or save for later-
 write.table(full.data, file = "combined.CT.csv", sep = ",", col.names = NA,
@@ -463,3 +376,4 @@ Could then calculate mean for control for each gene, and then use this to calcua
 
 [1]:https://github.com/lkomoro/qPCR-automated-analysis/blob/master/Instructions%20for%20qPCR%20data%20extraction%20using%20SDS%20software.pdf
 [2]: http://www.bioconductor.org/packages/release/bioc/html/qpcrNorm.html
+[3]:http://www.vetmed.ucdavis.edu/vme/taqmanservice/External_runs.html
