@@ -23,7 +23,7 @@ IV. Normalizing by HK genes or *GeNorm* normalization factor and prepping for an
 ```{r setwd, echo=TRUE}
 source('/users/Komo/Desktop/Rfiles/toolbox.functions.R')
 setwd('/users/Komo/Desktop/Rfiles/qPCR.analysis')
-getwd()
+getwd()#can double check that you are where you think you are
 ```
 ###Read in qPCR data exported from SDS software and clean up 
 *(this code, and several others below should be generalized to read in and name in a loop)*
@@ -35,7 +35,7 @@ plate3<-read.delim('Connon.p3.7.1.14.edited.txt')
 plate28<-read.delim('Connon.p28.7.1.14.edited.txt')
 ```
 ###Check the data structure 
-*notes:*
+**Notes:**
 *CT will be factor because of Undetermined at first, unless there are no undetermined values on your plate. If you have any plates that don't have undetermined values, it will read the Ct as a number, and then replace with NAs in the merge (because if some plates have Ct as factor and others as a num, it will get confused during the merge)*
 ```{r data structure, echo=TRUE}
 str(plate1)
@@ -112,7 +112,7 @@ Read in template files with corresponding cDNA wells and gene #s for a 12 or 24 
 ```{r readin2, echo=TRUE}
 qPCR.24.template<-read.csv('qPCR.384template.24.gene.csv')
 ```
-In MS Excel, use the cDNA template to paste in sample IDs for your 96 well plate, then read in
+In MS Excel, use the cDNA template to paste in sample IDs for your 96 well plate, then read in  
 My default just has sample name, but you can easy paste in treatments/do text columns, etc. if want to parse before reading in
 ```{r readin2, echo=TRUE}
 cDNA.96<-read.csv('cDNA.thermal.microarray.samples.csv')
@@ -143,16 +143,15 @@ str(qPCR.sample.ID.merge)
 ```
 *Note that the code below may need to be amended depending on plate setup, etc. (that's why check data structure)*
 
-If you want to shorten up anything
-
-Example: 
+If you want to shorten up anything:  
+*Example:* 
 ```{r shorten, echo=TRUE}
 qPCR.sample.ID.merge1<-qPCR.sample.ID.merge[,c(1:6)]
 ```
-You can export to excel if you want to double check that everything merged correctly:
+You can export to excel if you want to double check that everything merged correctly:  
 *(once you have proved to yourself that it's all gravy, can skip this)*
 
-Note that this is for the full merged file, not the shortened example because I wanted to keep everything for now
+**Note**: this is for the full merged file, not the shortened example because I wanted to keep everything for now
 ```{r write, echo=TRUE}
 write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = ",", col.names = NA,
             qmethod = "double")
@@ -160,11 +159,11 @@ write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = "
 
 ##Part III: Merge supporting info (file IDs/gene names, etc.) with qPCR results:
 
-The two files we want are 
-*1 full.data.clean1 (or full.data1 if didn't remove undetermines)*
-*2 qPCR.sample.ID.merge*
+The two files we want are:  
+*1 full.data.clean1 (or full.data1 if didn't remove undetermines)*  
+*2 qPCR.sample.ID.merge*  
 
-We want to merge them based on *qPCR.well* and *qPCR plate*
+We want to merge them based on *qPCR.well* and *qPCR plate*  
 The final merged file should have the same # of observations as the qPCR.results.comb. The qPCR results should have less if you removed all the Undet.
 ```{r merge3, echo=TRUE}
 #1. undet. removed:
@@ -185,12 +184,12 @@ write.table(data1, file = "merged.thermal.data.total.undetermined.retained.csv",
             qmethod = "double")
 ```
 
-I removed a the few data points that the curves looked bad/funky for QC:
-For my records, here are the samples that were removed:
--sample #338-T3-t30-R5 15C acclimation, gene=CDKN1B, case #5050 (qPCR plate 22, qPCR well L18,  cDNA plate #4, cDNA well F8)
--sample #398-HC-t60-R6 15C acclimation, gene=BT1A1, case #6305 (qPCR plate 26, qPCR well D24, cDNA plate # 5, cDNA well B4)
--sample #46-T3-t60-R5 11.5C acclimation, gene=CDKN1B, case #7594 (qPCR plate 3, qPCR well L18, cDNA plate #1, cDNA well F6)
--sample #142-T1-t60-R4 18C acclimation, gene=CDKN1B, case #9754 (qPCR plate 9, qPCR well L18, cDNA plate # 3, cDNA well F6)
+I removed a the few data points that the curves looked bad/funky for QC:  
+*For my records, here are the samples that were removed:*  
+-sample #338-T3-t30-R5 15C acclimation, gene=CDKN1B, case #5050 (qPCR plate 22, qPCR well L18,  cDNA plate #4, cDNA well F8)  
+-sample #398-HC-t60-R6 15C acclimation, gene=BT1A1, case #6305 (qPCR plate 26, qPCR well D24, cDNA plate # 5, cDNA well B4)  
+-sample #46-T3-t60-R5 11.5C acclimation, gene=CDKN1B, case #7594 (qPCR plate 3, qPCR well L18, cDNA plate #1, cDNA well F6)  
+-sample #142-T1-t60-R4 18C acclimation, gene=CDKN1B, case #9754 (qPCR plate 9, qPCR well L18, cDNA plate # 3, cDNA well F6)  
 ```{r remove, echo=TRUE}
 data1.odd.remove<-data1[c(1:5049,5051:6304,6306:7593,7595:9753,9755:9840), ] 
 #just double checking to make sure removed right ones, yes correct.
@@ -213,14 +212,15 @@ HK.genes.w.undet.df<-subset(data1.odd.remove, gene.name=="G6PD" |gene.name=="GAP
 write.table(HK.genes.w.undet.df, file = "HK.genes.w.undet.csv", sep = ",", col.names = NA,
             qmethod = "double")
 ```
-Alternatively, it looks like there's a function to normalize in Bioconductor, [script looks pretty simple] [2], but I haven't had time yet to look into it.
+Alternatively, it looks like there's a function to normalize in Bioconductor, [script looks pretty simple] [2], but I haven't had time yet to look into it.  
+*Resources to check it out:*
 ```{r BioC, echo=TRUE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("qpcrNorm")
 ```
 
-###Method One: if you just want to normalize to a reference gene *For Example, Let's say that G6PD is our HK gene*
-
+###Method One: 
+if you just want to normalize to a reference gene *For Example, Let's say that G6PD is our HK gene*  
 *Or can import file from GeNorm with calculated normalization factors and merge on sample # (be sure to keep the sample #s in the file so it can merge on those values)*
 ```{r Hk2, echo=TRUE}
 hk<-subset(data1.odd.remove,gene.name=="G6PD")
@@ -245,9 +245,9 @@ w <- reshape(normalized.data1.short,
              idvar = c("qPCR.plate.24", "acclimation.temperature", "life.stage", "temp.treatment", "recovery.time", "replicate","tissue", "sample.no"),
              direction = "wide")
 ```
-###Method 2: You already have the stability calculated, so you know what genes to use and want to calculate the normalization factor directly here
-
-*Note-below is for calculating normalization factors using all the total dataset. If you want to do it per plate, amend by splitting by plate in calculations, etc.*
+###Method 2: 
+You already have the stability calculated, so you know what genes to use and want to calculate the normalization factor directly here  
+**Note** *-below is for calculating normalization factors using all the total dataset. If you want to do it per plate, amend by splitting by plate in calculations, etc.*  
 
 First, remove NA's if you haven't already, or else will use those as minimum per gene
 ```{r M2, echo=TRUE}
@@ -292,7 +292,7 @@ str(wide.ref)
 ```
 ####Normalization factors:
 
-Create geometric mean function:
+#####First, create the geometric mean function:
 ```{r fun, echo=TRUE}
 geo_mean <- function(data) {
   log_data <- log(data)
@@ -301,18 +301,20 @@ geo_mean <- function(data) {
 }
 ```
 
+#####Then, apply in calculations:
 Example of using *KeNorm* normalizing with test data:
 ```{r test, echo=TRUE}
 test.data<-read.csv("test.data.csv")
 ```
-1.Calculate geomean across ref genes for each sample:
+1. Calculate geomean across ref genes for each sample:
 ```{r test, echo=TRUE}
 test.data$geomean<-(test.data$x1*test.data$x2*test.data$x3)^(1/3)#note need to change this depending on how many ref genes you have (i.e., if have 2, change exponent to 1/2)
 ```
 
-QC-after writing these functions and running them on test data, I pasted these values into spreadsheet with GeNorm formulas-confirmed exact same values) *Code in excel=(PRODUCT(range of ref gene values per each sample))^(1/COUNT(range of ref gene values per each sample))*
+**QC**-after writing these functions and running them on test data, I pasted these values into spreadsheet with GeNorm formulas-confirmed exact same values)  
+*Code in excel=(PRODUCT(range of ref gene values per each sample))^(1/COUNT(range of ref gene values per each sample))*
 
-probably can go back and figure out how to apply the function across columns so don't need to change gene #, but fine for now...
+*note to self: go back and add code to apply the function across columns so don't need to change gene #*
 
 2. Calculate the geometric mean of all the samples for each reference gene:
 ```{r test, echo=TRUE}
@@ -320,17 +322,19 @@ t1<-geo_mean(test.data$x1)
 t2<-geo_mean(test.data$x2)
 t3<-geo_mean(test.data$x3)
 ```
-*Code in excel =(PRODUCT(range of values for one gene for all samples))^(1/COUNT(range of values for one gene for all samples)))*
+*Code in excel =(PRODUCT(range of values for one gene for all samples))^(1/COUNT(range of values for one gene for all samples)))*  
+
 3. Geomean of geomeans:
 ```{r test, echo=TRUE}
 V2<-geo_mean(c(t1,t2,t3))
 ```
-*Code in excel=(PRODUCT(the range of cells with the geomeans for all your ref genes))^(1/COUNT(the range of cells with the geomeans for all your ref genes)))*
+*Code in excel=(PRODUCT(the range of cells with the geomeans for all your ref genes))^(1/COUNT(the range of cells with the geomeans for all your ref genes)))*  
+
 4. Calculate normalization factor for each sample (#FYI Ken's code in excel==geomean of all the ref genes for the sample/geomean of geomeans)
 ```{r test, echo=TRUE}
 test.data$norm.factor<-(test.data$geomean)/V2
 ```
-*Code in excel==geomean of all the ref genes for the sample/geomean of geomeans)*
+*Code in excel=(geomean of all the ref genes for the sample/geomean of geomeans)*
 
 
 ####Apply to real data:
@@ -347,7 +351,7 @@ G1<-geo_mean(c(x1,x2,x3))
 wide.ref$norm.factor<-(wide.ref$geomean)/G1
 ```
 
-Merge back with full data:
+####Merge back with full data:
 ```{r merge5, echo=TRUE}
 data3<-merge(wide.ref,data2, all=T)#checking to make sure all cases get assigned, and if not, figure out why cases disappear when have all=false (default)
 data3b<-merge(wide.ref,data2)
@@ -356,9 +360,10 @@ write.table(data3, file = "data.norm.check1.csv", sep = ",", col.names = NA,
 write.table(data3b, file = "data.norm.check2.csv", sep = ",", col.names = NA,
             qmethod = "double")
 ```
-For, it was that 2 genes for a blank actually had Ct values (high 30's) so they were retained, but since the ref genes had been removed as NA's, there was nothing to match them too (see the qPCR spreadsheet for further notes)
 
-So actually, we want to delete these cases so good to use 'data3b' for downstream
+For my dataset, cases disappeared because 2 genes for a blank actually had Ct values (high 30's) so they were retained, but since the ref genes had been removed as NA's, there was nothing to match them too (see the qPCR spreadsheet for further notes). So actually, we wanted to delete these cases, so we are good to use our new dataframe *'data3b'* for downstream analyses  
+
+#####Final transformations, formatting and saving file:
 ```{r clean, echo=TRUE}
 data3b$Ct.normalized<-data3b$linearCt/data3b$norm.factor
 data3b$Ct.log2.form<-(-log(data3b$Ct.normalized,base=2))
@@ -375,10 +380,10 @@ data4.wide <- reshape(data4,
 write.table(data4.wide, file = "Ct.all.normalized.wide.csv", sep = ",", col.names = NA,
             qmethod = "double")
 ```
-Could then calculate mean for control for each gene, and then use this to calcualte delta delta Cts, and logfold changes. But for my experimental design (2x2 factorial), it's a bit ambiguous about which one should be the 'control', so I just use delta CT and treat handling controls as a treatment in downstream analyses
+
+**Note**- You could then calculate mean for control for each gene, and then use this to calcualte delta delta Cts, and logfold changes. But for my experimental design (2x2 factorial), it's a bit ambiguous about which one should be the 'control', so I just use delta CT and treat handling controls as a treatment in downstream analyses
 
 ###Next to add-Part V: Data Analysis & Visualization
-
 
 [1]:https://github.com/lkomoro/qPCR-automated-analysis/blob/master/Instructions%20for%20qPCR%20data%20extraction%20using%20SDS%20software.pdf
 [2]: http://www.bioconductor.org/packages/release/bioc/html/qpcrNorm.html
