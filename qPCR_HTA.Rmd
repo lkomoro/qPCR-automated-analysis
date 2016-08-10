@@ -403,4 +403,4 @@ write.table(data4.wide, file = "Ct.all.normalized.wide.csv", sep = ",", col.name
 #delta delta Cts, and logfold changes. But for mine, a bit ambiguous about which one is control (bc temp and time), so holding off and just using delta CT for now
 
 
-[1] https://github.com/lkomoro/qPCR-automated-analysis/blob/master/Instructions%20for%20qPCR%20data%20extraction%20using%20SDS%20software.pdf
+[1]: https://github.com/lkomoro/qPCR-automated-analysis/blob/master/Instructions%20for%20qPCR%20data%20extraction%20using%20SDS%20software.pdf
