@@ -4,12 +4,18 @@ author: "Lisa Komoroske"
 date: "August 9, 2016"
 output: html_document
 ---
-####*Note this .Rmd is a work in progress...transitioning from scripts...*
+####*Note this Markdown document is a work in progress...transitioning from scripts...*
 
 ## Introduction
 This document is focused on rapid processing and statistical analysis of qPCR gene expression data from Applied Biosystems HT 7900 instrument [(UC Davis Vet Med Real-Time PCR Core Facility)] [3]. The input is .txt files that have been processed by SDS software (instructions on this are [here] [1]). Note this script is currently just in a 'quick and dirty' format that I wrote awhile back-much of the code could be made more compact and formatted for general use-plan to fix that up when I have a chance. But, it works, and can be viewed as an example and amended easily to match other datasets in the meantime.
 
-It is composed of the following sections:
+###It is composed of the following sections:
+I. Data read in and clean up
+II. Read in supporting files and merge
+III. Merge supporting info (file IDs/gene names, etc.) with qPCR results
+IV. Normalizing by HK genes or *GeNorm* normalization factor and prepping for analyses
+
+*these are the precursors to Part V+: Data Analysis & Visualization, will add and link later*
 
 
 ##Part I: Data read in and clean up
@@ -101,7 +107,7 @@ full.data1<-full.data[,c(2,4,7,8)]
 qPCR.results.comb <- rbind(plate1.clean, plate2.clean) #etc.
 ```
 
-##Part II: read in supporting files and merge:
+##Part II: Read in supporting files and merge:
 Read in template files with corresponding cDNA wells and gene #s for a 12 or 24 gene set of 384 qPCR plates for a 96 well plate (either 3 or 6 plates):
 ```{r readin2, echo=TRUE}
 qPCR.24.template<-read.csv('qPCR.384template.24.gene.csv')
@@ -152,7 +158,7 @@ write.table(qPCR.sample.ID.merge, file = "merged.thermal.qPCR.file.csv", sep = "
             qmethod = "double")
 ```
 
-##Part III: Merge supporting info(file IDs/gene names) etc. with qPCR results:
+##Part III: Merge supporting info (file IDs/gene names, etc.) with qPCR results:
 
 The two files we want are 
 *1 full.data.clean1 (or full.data1 if didn't remove undetermines)*
@@ -192,7 +198,7 @@ write.table(data1.odd.remove, file = "merged.thermal.data.total.undetermined.ret
             qmethod = "double")
 ```
 
-##Part IV: normalizing by HK genes or *GeNorm* normalization factor and prepping for analyses
+##Part IV: Normalizing by HK genes or *GeNorm* normalization factor and prepping for analyses
 
 If you are using *Genorm* to assess HK gene stability subset the data housekeeping genes to import the .csv into program in lab, run algorithm for stability (if you calculate normalization factor in *GeNorm*, then can use the same merge function below to attach the normalization factor to divide by)
 ####Option 1. Undet. removed:
