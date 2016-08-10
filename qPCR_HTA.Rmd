@@ -294,7 +294,7 @@ HK.genes.w.undet.df<-subset(data1.odd.remove, gene.name=="G6PD" |gene.name=="GAP
 write.table(HK.genes.w.undet.df, file = "HK.genes.w.undet.csv", sep = ",", col.names = NA,
             qmethod = "double")
 ```
-Alternatively, it like there''s something's a function tonormalize in Bioconductor, [script looks pretty simple] [2], but I haven't had time yet to look into it.
+Alternatively, it looks like there's a function to normalize in Bioconductor, [script looks pretty simple] [2], but I haven't had time yet to look into it.
 ```{r BioC, echo=TRUE}
 source("http://bioconductor.org/biocLite.R")
 biocLite("qpcrNorm")
