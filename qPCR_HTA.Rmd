@@ -224,7 +224,7 @@ str(qPCR.sample.ID.merge)
 ```
 *Note that the code below may need to be amended depending on plate setup, etc. (that's why check data structure)*
 If you want to shorten up anything
-Example:
+Example: 
 ```{r shorten, echo=TRUE}
 qPCR.sample.ID.merge1<-qPCR.sample.ID.merge[,c(1:6)]
 ```
